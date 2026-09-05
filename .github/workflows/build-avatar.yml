@@ -24,12 +24,18 @@ jobs:
       - name: Install Blender
         run: |
           sudo apt-get update
-          sudo apt-get install --yes blender python3-numpy
+          sudo apt-get install --yes \
+            blender \
+            python3-numpy \
+            xvfb \
+            libegl1 \
+            libgl1-mesa-dri \
+            libglx-mesa0
           blender --version
 
       - name: Generate editable source, GLB and renders
         run: |
-          blender --background --factory-startup \
+          xvfb-run -a blender --background --factory-startup \
             --python scripts/blender/build_enki_avatar.py -- \
             --output-root artifacts
           test -s artifacts/enki-organic-v1.blend
