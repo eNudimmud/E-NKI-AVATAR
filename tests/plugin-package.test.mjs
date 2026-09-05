@@ -22,7 +22,8 @@ test("ships an installable Hermes dashboard plugin", async () => {
   assert.equal(manifest.css, "dist/style.css");
   assert.equal(manifest.api, "plugin_api.py");
   assert.match(pluginYaml, /^name: enki-avatar$/m);
-  assert.match(pluginYaml, /^version: 0\.3\.0$/m);
+  assert.match(pluginYaml, /^version: 0\.3\.1$/m);
+  assert.match(pluginYaml, /^manifest_version: 1$/m);
   assert.match(pluginModule, /^def register\(ctx\):$/m);
   assert.match(pluginApi, /@router\.get\("\/avatar\/\{filename\}"/);
   assert.match(pluginApi, /filename not in _ASSETS/);

@@ -40,9 +40,9 @@ npm run dev
 
 Depuis le chat de l’agent Hermes, envoyez ce message :
 
-> Installe et active le plugin `https://github.com/eNudimmud/E-NKI-AVATAR` avec `/opt/hermes/bin/hermes plugins install https://github.com/eNudimmud/E-NKI-AVATAR --enable`, puis force la redécouverte du dashboard avec une requête locale vers `http://127.0.0.1:9119/api/dashboard/plugins/rescan`. Ne modifie pas le dashboard principal et ne révèle aucune clé. Donne-moi seulement le résultat de l’installation.
+> Installe et active le plugin avec `/opt/hermes/bin/hermes plugins install eNudimmud/E-NKI-AVATAR --enable`. Ne modifie pas le dashboard principal et ne révèle aucune clé. Donne-moi seulement le résultat de l’installation.
 
-Rechargez ensuite le dashboard et ouvrez l’onglet **E*NKI**. Au premier clic sur **Activer la conversation**, le navigateur demandera l’autorisation d’utiliser le microphone.
+La liste des plugins est mise en cache par le processus du dashboard. Après une première installation, utilisez son endpoint de rescan avec une session authentifiée ou redémarrez uniquement le dashboard, puis rechargez la page et ouvrez l’onglet **E*NKI**. Au premier clic sur **Activer la conversation**, le navigateur demandera l’autorisation d’utiliser le microphone.
 
 Le plugin est servi par le dashboard lui-même. Sa route backend lit les portraits canoniques sous `public/avatar2d/`, et son interface utilise `SDK.buildWsUrl()` et `SDK.fetchJSON()` : aucun port public, tunnel ou secret côté navigateur n’est nécessaire.
 

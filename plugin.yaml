@@ -1,8 +1,7 @@
 name: enki-avatar
-version: 0.3.0
-manifest_version: 2
+version: 0.3.1
+manifest_version: 1
 api_version: 1
 description: Avatar conversationnel temps réel E*NKI pour le dashboard Hermes
 homepage: https://github.com/eNudimmud/E-NKI-AVATAR
 tags: [dashboard, avatar, voice, realtime]
-

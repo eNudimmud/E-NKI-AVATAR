@@ -3,7 +3,7 @@
   "label": "E*NKI",
   "description": "Avatar conversationnel visage et buste, relié au gateway Hermes en temps réel.",
   "icon": "MessageSquare",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "tab": {
     "path": "/enki-avatar",
     "position": "after:sessions"
