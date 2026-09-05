@@ -689,7 +689,7 @@
         }
         updateBusy(false);
         finishTts();
-      } else if (event.type === "approval.request" || event.type === "clarify.request" || event.type === "sudo.request" || event.type === "secret.request") {
+      } else if (event.type.endsWith(".request")) {
         updateMode("thinking", "Validation requise dans Hermes");
       } else if (event.type === "error") {
         updateBusy(false);

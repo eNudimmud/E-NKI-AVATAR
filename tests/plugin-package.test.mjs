@@ -22,7 +22,7 @@ test("ships an installable Hermes dashboard plugin", async () => {
   assert.equal(manifest.css, "dist/style.css");
   assert.equal(manifest.api, "plugin_api.py");
   assert.match(pluginYaml, /^name: enki-avatar$/m);
-  assert.match(pluginYaml, /^version: 0\.3\.1$/m);
+  assert.match(pluginYaml, /^version: 0\.3\.2$/m);
   assert.match(pluginYaml, /^manifest_version: 1$/m);
   assert.match(pluginModule, /^def register\(ctx\):$/m);
   assert.match(pluginApi, /@router\.get\("\/avatar\/\{filename\}"/);
@@ -40,6 +40,7 @@ test("uses authenticated Hermes transports and streaming audio", async () => {
   assert.match(bundle, /"session\.interrupt"/);
   assert.doesNotMatch(bundle, /API_SERVER_KEY/);
   assert.doesNotMatch(bundle, /__HERMES_SESSION_TOKEN__/);
+  assert.doesNotMatch(bundle, /sudo\.request|privilege_escalation/);
 });
 
 test("registers and renders the E*NKI dashboard surface", async () => {
