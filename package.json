@@ -8,7 +8,7 @@
   "scripts": {
     "avatar:build": "node scripts/generate-enki-glb.mjs",
     "avatar:blender": "blender --background --factory-startup --python scripts/blender/build_enki_avatar.py -- --output-root artifacts",
-    "avatar:validate": "python3 scripts/blender/validate_glb.py public/models/enki-organic-v0.glb --profile runtime",
+    "avatar:validate": "python3 scripts/blender/validate_glb.py public/models/enki-organic-v1.glb --profile production",
     "install:ci": "bash scripts/install-ci.sh",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "build": "bash scripts/build-verified.sh",
