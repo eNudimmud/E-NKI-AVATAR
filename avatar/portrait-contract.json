@@ -1,0 +1,44 @@
+{
+  "name": "E*NKI frontal agent portrait",
+  "version": "2.0.0",
+  "rendering": {
+    "mode": "2.5D layered portrait",
+    "engine": "native WebGL",
+    "generationDuringConversation": false,
+    "framing": "head and bust, square to camera",
+    "masterDimensions": [1024, 1536]
+  },
+  "identity": {
+    "species": "adult anthropomorphic white lagomorph",
+    "face": "narrow angular mature face with restrained muzzle",
+    "eyes": "character right red-orange, character left amber-yellow",
+    "ears": "long upright pointed ears with pale pink interior",
+    "wardrobe": "weathered mustard parka over a deep red hoodie",
+    "emblem": "three yellow vertical blocks with one circle above each block"
+  },
+  "textures": {
+    "base": "public/avatar2d/enki-base.webp",
+    "blink": "public/avatar2d/enki-blink.webp",
+    "mouthAA": "public/avatar2d/enki-mouth-aa.webp",
+    "mouthE": "public/avatar2d/enki-mouth-e.webp",
+    "mouthO": "public/avatar2d/enki-mouth-o.webp"
+  },
+  "states": ["idle", "listening", "thinking", "speaking"],
+  "visemeMap": {
+    "SIL": null,
+    "PP": null,
+    "FF": "mouthE",
+    "TH": "mouthAA",
+    "DD": "mouthAA",
+    "KK": "mouthAA",
+    "CH": "mouthE",
+    "SS": "mouthE",
+    "NN": "mouthAA",
+    "RR": "mouthO",
+    "AA": "mouthAA",
+    "E": "mouthE",
+    "I": "mouthE",
+    "O": "mouthO",
+    "U": "mouthO"
+  }
+}

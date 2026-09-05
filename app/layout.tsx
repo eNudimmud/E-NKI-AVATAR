@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "E*NKI Avatar Runtime",
-  description: "Moteur expérimental d’avatar-agent E*NKI en temps réel.",
+  description: "Portrait-agent photoréaliste E*NKI animé localement en temps réel.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

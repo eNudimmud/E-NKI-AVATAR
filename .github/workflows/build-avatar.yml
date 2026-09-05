@@ -1,59 +1,31 @@
-name: Build E*NKI avatar
+name: Validate E*NKI portrait
 
 on:
   workflow_dispatch:
   push:
     paths:
       - "avatar/**"
-      - "scripts/blender/**"
+      - "public/avatar2d/**"
+      - "scripts/validate-avatar2d.mjs"
       - ".github/workflows/build-avatar.yml"
 
 permissions:
   contents: read
 
 jobs:
-  blender:
-    name: Blender headless build
+  portrait:
+    name: Validate 2.5D assets
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 5
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Blender
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes \
-            blender \
-            python3-numpy \
-            xvfb \
-            libegl1 \
-            libgl1-mesa-dri \
-            libglx-mesa0
-          blender --version
-
-      - name: Generate editable source, GLB and renders
-        run: |
-          xvfb-run -a blender --background --factory-startup \
-            --python scripts/blender/build_enki_avatar.py -- \
-            --output-root artifacts
-          test -s artifacts/enki-organic-v1.blend
-          test -s artifacts/enki-organic-v1.glb
-
-      - name: Validate runtime contract
-        run: |
-          python3 scripts/blender/validate_glb.py \
-            artifacts/enki-organic-v1.glb \
-            --profile production
-
-      - name: Publish build artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: enki-organic-v1
-          path: |
-            artifacts/enki-organic-v1.blend
-            artifacts/enki-organic-v1.glb
-            artifacts/renders/*.png
-          if-no-files-found: error
-          retention-days: 30
+          node-version: 22
+
+      - name: Validate aligned portrait set
+        run: node scripts/validate-avatar2d.mjs

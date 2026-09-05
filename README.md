@@ -1,28 +1,35 @@
 # E*NKI Avatar Runtime
 
-Prototype de moteur d’avatar-agent en temps réel. Le rendu fonctionne localement dans le navigateur avec Three.js et ne génère aucune image pendant la conversation.
+Portrait-agent photoréaliste animé en temps réel. E*NKI reste face caméra, cadré au buste, et réagit sans génération d’image pendant la conversation.
 
-## État actuel
+## Pourquoi un moteur 2.5D
 
-- asset GLB généré automatiquement et animé à la fréquence de rendu du navigateur ;
+Le rendu combine cinq portraits préchargés et un shader WebGL. Le navigateur anime la respiration, les micro-mouvements du visage, le regard, le clignement et les transitions entre formes de bouche. Cette architecture privilégie l’identité visuelle et la réactivité : une fois les textures chargées, le GPU ne fait que les composer localement.
+
+## Capacités
+
 - états `idle`, `listening`, `thinking` et `speaking` ;
-- clignements, regard, oreilles, respiration et mâchoire ;
-- réaction directe au niveau du microphone ;
+- clignement naturel et micro-mouvements du buste ;
+- suivi discret du pointeur ou regard piloté par l’agent ;
+- trois formes de bouche couvrant quinze visèmes ;
+- réaction au niveau audio du microphone ;
 - démonstrateur vocal via la synthèse du navigateur ;
-- pont WebSocket acceptant les événements de l’agent ;
-- vocabulaire de quinze visèmes adapté au futur rig Blender.
+- pont WebSocket pour piloter l’avatar depuis un agent ;
+- affiche statique de secours si WebGL est indisponible.
 
-Le modèle Blender validé est publié sous `public/models/enki-organic-v1.glb` et chargé en priorité par Three.js. Le modèle `public/models/enki-organic-v0.glb` reste le secours procédural généré par `npm run avatar:build`. La commande `npm run avatar:blender` produit :
+Les assets de production sont sous `public/avatar2d/`. Leur identité, leur cadrage et leur table de visèmes sont décrits dans `avatar/portrait-contract.json`.
 
-- `artifacts/enki-organic-v1.blend`, source éditable ;
-- `artifacts/enki-organic-v1.glb`, asset temps réel ;
-- trois rendus de contrôle sous `artifacts/renders/`.
+## Lancer le projet
 
-Le runtime conserve le modèle procédural de secours tant que le GLB de production n’est pas disponible ou ne respecte pas le contrat.
+```bash
+npm run install:ci
+npm run avatar:validate
+npm run dev
+```
 
 ## Protocole WebSocket
 
-Chaque message est un objet JSON conforme à `protocol/avatar-events.schema.json`.
+Chaque message est un objet JSON conforme à `protocol/avatar-events.schema.json` :
 
 ```json
 {
@@ -33,11 +40,9 @@ Chaque message est un objet JSON conforme à `protocol/avatar-events.schema.json
 }
 ```
 
-Les paquets peuvent ne contenir qu’un seul champ. Les paquets invalides sont ignorés afin que le rendu ne soit jamais bloqué par le trafic de l’agent.
+Les paquets peuvent ne contenir qu’un seul champ. Un paquet mal formé est ignoré sans interrompre le rendu.
 
 ## API navigateur
-
-Le runtime expose aussi `window.enkiAvatar` :
 
 ```js
 window.enkiAvatar.setState("speaking");
@@ -46,17 +51,10 @@ window.enkiAvatar.setGaze(0.2, -0.1);
 window.enkiAvatar.setInputLevel(0.45);
 ```
 
-## Pipeline Blender automatisé
+## Performance
 
-Le contrat du modèle se trouve dans `avatar/rig-contract.json`. Il fige les nœuds attendus par Three.js, les os du rig, les quinze visèmes et les quatre clips d’état agent. Le script `scripts/blender/build_enki_avatar.py` construit l’avatar organique en costume anthracite et capuche sombre, conformément aux références de travail, avec l’hétérochromie canonique d’E*NKI.
+Le jeu WebP pèse moins de 1,5 Mo et est validé automatiquement par GitHub Actions. Aucun serveur GPU, ComfyUI, Blender ou modèle génératif n’est requis à l’exécution.
 
-Le workflow `.github/workflows/build-avatar.yml` installe Blender sur un runner GitHub, exécute la génération headless, valide le GLB puis fournit le `.blend`, le `.glb` et les rendus comme artifact téléchargeable. Aucune connaissance de Blender n’est nécessaire : toute modification du générateur relance la chaîne, et le workflow **Build E*NKI avatar** peut aussi être exécuté manuellement depuis l’onglet Actions.
+## Licence
 
-## Validation locale
-
-```bash
-npm run avatar:validate
-python3 -m py_compile scripts/blender/build_enki_avatar.py scripts/blender/validate_glb.py
-```
-
-Le code du moteur et la licence artistique de l’identité E*NKI resteront séparés avant la publication publique. Les images de référence privées ne sont ni copiées ni embarquées dans le dépôt.
+Le choix de licence du code et des assets E*NKI doit être finalisé avant une diffusion publique stable.

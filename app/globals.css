@@ -69,8 +69,47 @@ button { color: inherit; }
 .state-speaking .live-state-dot { background: #c24550; box-shadow: 0 0 14px #c24550; animation: state-pulse 0.8s ease-in-out infinite alternate; }
 
 .stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; border-right: 1px solid var(--line); }
-.avatar-canvas { position: absolute; inset: 0; }
-.avatar-canvas canvas { width: 100%; height: 100%; display: block; }
+.avatar-canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 56%, rgba(185, 125, 36, 0.18), transparent 30%),
+    radial-gradient(circle at 50% 22%, rgba(230, 214, 187, 0.07), transparent 24%),
+    #090807;
+}
+.avatar-canvas canvas { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; display: block; }
+.avatar-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 1;
+  transition: opacity 260ms ease;
+}
+.avatar-canvas.is-ready .avatar-poster { opacity: 0; }
+.avatar-loading {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 4.2rem;
+  translate: -50% 0;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(8, 8, 7, 0.72);
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+.avatar-canvas.is-ready .avatar-loading { opacity: 0; }
 .stage-grid {
   pointer-events: none;
   position: absolute;

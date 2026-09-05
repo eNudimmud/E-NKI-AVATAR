@@ -44,3 +44,6 @@ next-env.d.ts
 /artifacts/
 __pycache__/
 *.py[cod]
+
+# High-resolution working frames; optimized WebP assets are tracked in public/avatar2d.
+references/avatar2d-source/
