@@ -149,8 +149,8 @@ def uv_sphere(
     scale: tuple[float, float, float],
     material: bpy.types.Material,
     parent=None,
-    segments: int = 48,
-    rings: int = 32,
+    segments: int = 24,
+    rings: int = 16,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_uv_sphere_add(segments=segments, ring_count=rings, location=location)
     obj = bpy.context.object
@@ -228,8 +228,8 @@ def tapered_ear(
     material: bpy.types.Material,
     parent=None,
     lean: float = 0.0,
-    segments: int = 48,
-    rings: int = 32,
+    segments: int = 24,
+    rings: int = 16,
 ) -> bpy.types.Object:
     """A pointed, slightly asymmetric ear derived from a smooth sphere."""
     obj = uv_sphere(name, location, scale, material, parent, segments, rings)
@@ -344,8 +344,8 @@ def create_mouth_with_visemes(
         (0.155, 0.028, 0.040),
         mouth_material,
         parent=jaw,
-        segments=48,
-        rings=24,
+        segments=24,
+        rings=14,
     )
     basis = mouth.shape_key_add(name="Basis")
     basis.interpolation = "KEY_LINEAR"
@@ -447,16 +447,16 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     uv_sphere("Muzzle_L", (-0.13, -0.515, 1.84), (0.21, 0.17, 0.19), colors["muzzle"], jaw)
     uv_sphere("Muzzle_R", (0.13, -0.515, 1.84), (0.21, 0.17, 0.19), colors["muzzle"], jaw)
     uv_sphere("Chin", (0, -0.39, 1.67), (0.20, 0.16, 0.13), colors["fur"], jaw)
-    uv_sphere("Nose", (0, -0.694, 1.91), (0.078, 0.050, 0.060), colors["nose"], jaw, segments=32, rings=20)
+    uv_sphere("Nose", (0, -0.694, 1.91), (0.078, 0.050, 0.060), colors["nose"], jaw, segments=24, rings=14)
     create_mouth_with_visemes(jaw, contract, colors["mouth"])
     cube("Incisor_L", (-0.022, -0.660, 1.704), (0.017, 0.010, 0.030), colors["teeth"], jaw, bevel=0.007)
     cube("Incisor_R", (0.022, -0.660, 1.704), (0.017, 0.010, 0.030), colors["teeth"], jaw, bevel=0.007)
 
     def build_eye(control, x, iris_material, suffix):
-        uv_sphere(f"EyeSocket_{suffix}", (x, -0.420, 2.075), (0.147, 0.070, 0.112), colors["fur_shadow"], control, segments=40, rings=24)
-        uv_sphere(f"EyeGlobe_{suffix}", (x, -0.458, 2.075), (0.119, 0.050, 0.083), colors["sclera"], control, segments=40, rings=24)
-        uv_sphere(f"Iris_{suffix}", (x, -0.507, 2.075), (0.052, 0.014, 0.055), iris_material, control, segments=32, rings=20)
-        uv_sphere(f"Pupil_{suffix}", (x, -0.521, 2.075), (0.014, 0.009, 0.036), colors["pupil"], control, segments=24, rings=16)
+        uv_sphere(f"EyeSocket_{suffix}", (x, -0.420, 2.075), (0.147, 0.070, 0.112), colors["fur_shadow"], control, segments=24, rings=16)
+        uv_sphere(f"EyeGlobe_{suffix}", (x, -0.458, 2.075), (0.119, 0.050, 0.083), colors["sclera"], control, segments=24, rings=16)
+        uv_sphere(f"Iris_{suffix}", (x, -0.507, 2.075), (0.052, 0.014, 0.055), iris_material, control, segments=20, rings=14)
+        uv_sphere(f"Pupil_{suffix}", (x, -0.521, 2.075), (0.014, 0.009, 0.036), colors["pupil"], control, segments=16, rings=10)
 
     # Viewer-left eye is the character's right: orange-red. Viewer-right is amber.
     build_eye(eye_l, -0.18, colors["iris_red"], "L")
@@ -465,9 +465,9 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     polygon_prism("Brow_R", [(0.34, 2.27), (0.18, 2.23), (0.07, 2.17), (0.10, 2.24), (0.31, 2.31)], -0.515, 0.020, colors["fur_shadow"], head_control, bevel=0.014)
 
     def build_ear(control, x, sign, suffix):
-        outer = tapered_ear(f"EarOuter_{suffix}", (x + sign * 0.025, 0.0, 3.00), (0.19, 0.13, 0.68), colors["fur"], control, lean=sign * 0.09, segments=40, rings=28)
+        outer = tapered_ear(f"EarOuter_{suffix}", (x + sign * 0.025, 0.0, 3.00), (0.19, 0.13, 0.68), colors["fur"], control, lean=sign * 0.09, segments=24, rings=18)
         outer.rotation_euler.y = sign * math.radians(-3.0)
-        inner = tapered_ear(f"EarInner_{suffix}", (x + sign * 0.024, -0.122, 3.00), (0.094, 0.026, 0.50), colors["inner"], control, lean=sign * 0.045, segments=36, rings=24)
+        inner = tapered_ear(f"EarInner_{suffix}", (x + sign * 0.024, -0.122, 3.00), (0.094, 0.026, 0.50), colors["inner"], control, lean=sign * 0.045, segments=20, rings=16)
         inner.rotation_euler.y = sign * math.radians(-3.0)
 
     build_ear(ear_l, -0.31, -1, "L")
