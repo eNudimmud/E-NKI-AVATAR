@@ -408,16 +408,16 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
         [(-0.58, 0.02), (-0.72, 0.56), (-0.68, 1.10), (-0.48, 1.48),
          (-0.29, 1.60), (0.29, 1.60), (0.48, 1.48), (0.68, 1.10),
          (0.72, 0.56), (0.58, 0.02)],
-        -0.16,
+        -0.40,
         0.54,
         colors["suit"],
         root,
         bevel=0.055,
     )
-    uv_sphere("Shoulder_L", (-0.59, 0.04, 1.08), (0.30, 0.34, 0.33), colors["suit"], root)
-    uv_sphere("Shoulder_R", (0.59, 0.04, 1.08), (0.30, 0.34, 0.33), colors["suit"], root)
-    uv_sphere("UpperArm_L", (-0.65, 0.08, 0.61), (0.23, 0.28, 0.52), colors["suit"], root)
-    uv_sphere("UpperArm_R", (0.65, 0.08, 0.61), (0.23, 0.28, 0.52), colors["suit"], root)
+    uv_sphere("Shoulder_L", (-0.59, -0.02, 1.08), (0.28, 0.37, 0.31), colors["suit"], root)
+    uv_sphere("Shoulder_R", (0.59, -0.02, 1.08), (0.28, 0.37, 0.31), colors["suit"], root)
+    uv_sphere("UpperArm_L", (-0.64, 0.02, 0.61), (0.20, 0.31, 0.53), colors["suit"], root)
+    uv_sphere("UpperArm_R", (0.64, 0.02, 0.61), (0.20, 0.31, 0.53), colors["suit"], root)
     polygon_prism("Shirt", [(-0.23, 0.50), (-0.25, 1.48), (0.25, 1.48), (0.23, 0.50)], -0.455, 0.035, colors["shirt"], root)
     polygon_prism("Lapel_L", [(-0.46, 1.48), (-0.18, 1.40), (-0.04, 0.88), (-0.29, 1.02)], -0.495, 0.045, colors["lapel"], root, bevel=0.018)
     polygon_prism("Lapel_R", [(0.46, 1.48), (0.18, 1.40), (0.04, 0.88), (0.29, 1.02)], -0.495, 0.045, colors["lapel"], root, bevel=0.018)
@@ -449,8 +449,8 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     uv_sphere("Chin", (0, -0.39, 1.67), (0.20, 0.16, 0.13), colors["fur"], jaw)
     uv_sphere("Nose", (0, -0.694, 1.91), (0.078, 0.050, 0.060), colors["nose"], jaw, segments=32, rings=20)
     create_mouth_with_visemes(jaw, contract, colors["mouth"])
-    cube("Incisor_L", (-0.032, -0.665, 1.718), (0.025, 0.014, 0.052), colors["teeth"], jaw, bevel=0.009)
-    cube("Incisor_R", (0.032, -0.665, 1.718), (0.025, 0.014, 0.052), colors["teeth"], jaw, bevel=0.009)
+    cube("Incisor_L", (-0.022, -0.660, 1.704), (0.017, 0.010, 0.030), colors["teeth"], jaw, bevel=0.007)
+    cube("Incisor_R", (0.022, -0.660, 1.704), (0.017, 0.010, 0.030), colors["teeth"], jaw, bevel=0.007)
 
     def build_eye(control, x, iris_material, suffix):
         uv_sphere(f"EyeSocket_{suffix}", (x, -0.420, 2.075), (0.147, 0.070, 0.112), colors["fur_shadow"], control, segments=40, rings=24)
@@ -461,8 +461,8 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     # Viewer-left eye is the character's right: orange-red. Viewer-right is amber.
     build_eye(eye_l, -0.18, colors["iris_red"], "L")
     build_eye(eye_r, 0.18, colors["iris_amber"], "R")
-    curve_line("Brow_L", [(-0.33, -0.485, 2.24), (-0.20, -0.515, 2.24), (-0.07, -0.505, 2.17)], 0.034, colors["fur_shadow"], head_control)
-    curve_line("Brow_R", [(0.33, -0.485, 2.24), (0.20, -0.515, 2.24), (0.07, -0.505, 2.17)], 0.034, colors["fur_shadow"], head_control)
+    polygon_prism("Brow_L", [(-0.34, 2.27), (-0.18, 2.23), (-0.07, 2.17), (-0.10, 2.24), (-0.31, 2.31)], -0.515, 0.020, colors["fur_shadow"], head_control, bevel=0.014)
+    polygon_prism("Brow_R", [(0.34, 2.27), (0.18, 2.23), (0.07, 2.17), (0.10, 2.24), (0.31, 2.31)], -0.515, 0.020, colors["fur_shadow"], head_control, bevel=0.014)
 
     def build_ear(control, x, sign, suffix):
         outer = tapered_ear(f"EarOuter_{suffix}", (x + sign * 0.025, 0.0, 3.00), (0.19, 0.13, 0.68), colors["fur"], control, lean=sign * 0.09, segments=40, rings=28)
