@@ -188,6 +188,65 @@ def cube(
     return obj
 
 
+def polygon_prism(
+    name: str,
+    outline: list[tuple[float, float]],
+    front_y: float,
+    depth: float,
+    material: bpy.types.Material,
+    parent=None,
+    bevel: float = 0.025,
+) -> bpy.types.Object:
+    """Create a shallow tailored panel from an x/z outline."""
+    back_y = front_y + depth
+    count = len(outline)
+    vertices = [(x, front_y, z) for x, z in outline]
+    vertices.extend((x, back_y, z) for x, z in outline)
+    faces = [tuple(range(count)), tuple(range((count * 2) - 1, count - 1, -1))]
+    for index in range(count):
+        following = (index + 1) % count
+        faces.append((index, following, count + following, count + index))
+    mesh = bpy.data.meshes.new(f"{name}_Mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.data.materials.append(material)
+    if bevel:
+        modifier = obj.modifiers.new("Tailored edge", "BEVEL")
+        modifier.width = bevel
+        modifier.segments = 3
+    if parent:
+        parent_keep_world(obj, parent)
+    return obj
+
+
+def tapered_ear(
+    name: str,
+    location: tuple[float, float, float],
+    scale: tuple[float, float, float],
+    material: bpy.types.Material,
+    parent=None,
+    lean: float = 0.0,
+    segments: int = 48,
+    rings: int = 32,
+) -> bpy.types.Object:
+    """A pointed, slightly asymmetric ear derived from a smooth sphere."""
+    obj = uv_sphere(name, location, scale, material, parent, segments, rings)
+    z_min = min(vertex.co.z for vertex in obj.data.vertices)
+    z_max = max(vertex.co.z for vertex in obj.data.vertices)
+    height = max(0.001, z_max - z_min)
+    for vertex in obj.data.vertices:
+        t = (vertex.co.z - z_min) / height
+        top_taper = max(0.22, 1.0 - (0.74 * (t ** 2.4)))
+        root_taper = 0.80 + (0.20 * min(1.0, t / 0.24))
+        vertex.co.x *= top_taper * root_taper
+        vertex.co.y *= 0.92 + (0.08 * (1.0 - t))
+        vertex.co.x += lean * ((t - 0.18) ** 1.45 if t >= 0.18 else 0.0)
+    obj.data.update()
+    return obj
+
+
 def cylinder(
     name: str,
     location: tuple[float, float, float],
@@ -281,8 +340,8 @@ def create_mouth_with_visemes(
 ) -> bpy.types.Object:
     mouth = uv_sphere(
         "Mouth",
-        (0.0, -0.655, 1.685),
-        (0.22, 0.035, 0.055),
+        (0.0, -0.652, 1.705),
+        (0.155, 0.028, 0.040),
         mouth_material,
         parent=jaw,
         segments=48,
@@ -301,10 +360,10 @@ def create_mouth_with_visemes(
         vertical = 1.0 + (openness * 3.45) + (rounded * 0.42)
         depth = 1.0 + (openness * 0.65) + (rounded * 0.22)
         for point, original in zip(key.data, source):
-            lower = max(0.0, -original.z / 0.055)
+            lower = max(0.0, -original.z / 0.040)
             point.co.x = original.x * horizontal
             point.co.y = original.y * depth
-            point.co.z = original.z * vertical - lower * openness * 0.038
+            point.co.z = original.z * vertical - lower * openness * 0.030
         key.value = 0.0
     mouth["enki_visemes"] = ",".join(item["name"] for item in contract["visemes"])
     return mouth
@@ -312,11 +371,12 @@ def create_mouth_with_visemes(
 
 def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     colors = {
-        "fur": make_material("Fur_OffWhite", (0.78, 0.76, 0.70, 1), 0.88, fur_bump=True),
-        "muzzle": make_material("Fur_Muzzle", (0.88, 0.86, 0.80, 1), 0.93, fur_bump=True),
-        "inner": make_material("Ear_Inner", (0.42, 0.24, 0.22, 1), 0.82),
-        "hood": make_material("Hood_Charcoal", (0.055, 0.052, 0.050, 1), 0.94),
-        "suit": make_material("Suit_Charcoal", (0.085, 0.082, 0.078, 1), 0.84),
+        "fur": make_material("Fur_OffWhite", (0.72, 0.70, 0.65, 1), 0.90, fur_bump=True),
+        "fur_shadow": make_material("Fur_Shadow", (0.48, 0.46, 0.42, 1), 0.93, fur_bump=True),
+        "muzzle": make_material("Fur_Muzzle", (0.84, 0.82, 0.76, 1), 0.94, fur_bump=True),
+        "inner": make_material("Ear_Inner", (0.36, 0.18, 0.17, 1), 0.86),
+        "hood": make_material("Hood_Charcoal", (0.030, 0.029, 0.030, 1), 0.96),
+        "suit": make_material("Suit_Charcoal", (0.060, 0.059, 0.061, 1), 0.88),
         "lapel": make_material("Suit_Lapel", (0.045, 0.043, 0.042, 1), 0.72),
         "shirt": make_material("Shirt_Black", (0.012, 0.012, 0.012, 1), 0.90),
         "tie": make_material("Tie_Black_Satin", (0.016, 0.014, 0.014, 1), 0.44),
@@ -333,60 +393,82 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     root = empty("EnkiRoot")
     root["enki_rig_version"] = contract["version"]
     root["identity"] = contract["identity"]["species"]
-    head_control = empty("HeadRig", (0.0, 0.0, 0.0), root)
-    jaw = empty("Jaw", (0.0, -0.43, 1.78), head_control)
-    eye_l = empty("Eye_L", (-0.235, -0.545, 2.055), head_control)
-    eye_r = empty("Eye_R", (0.235, -0.545, 2.055), head_control)
-    ear_l = empty("Ear_L", (-0.31, -0.015, 2.33), head_control)
-    ear_r = empty("Ear_R", (0.31, -0.015, 2.33), head_control)
+    head_control = empty("HeadRig", (0.0, 0.0, 1.52), root)
+    jaw = empty("Jaw", (0.0, -0.38, 1.76), head_control)
+    eye_l = empty("Eye_L", (-0.18, -0.445, 2.08), head_control)
+    eye_r = empty("Eye_R", (0.18, -0.445, 2.08), head_control)
+    ear_l = empty("Ear_L", (-0.22, -0.005, 2.42), head_control)
+    ear_r = empty("Ear_R", (0.22, -0.005, 2.42), head_control)
 
     create_armature(root, contract)
 
-    # Torso and tailored wardrobe, matching the supplied black-suit silhouette.
-    uv_sphere("Torso", (0, 0.04, 0.78), (0.78, 0.43, 0.94), colors["suit"], root)
-    uv_sphere("Shoulder_L", (-0.66, 0.01, 0.94), (0.43, 0.39, 0.39), colors["suit"], root)
-    uv_sphere("Shoulder_R", (0.66, 0.01, 0.94), (0.43, 0.39, 0.39), colors["suit"], root)
-    cube("Shirt", (0, -0.405, 1.02), (0.26, 0.035, 0.48), colors["shirt"], root, bevel=0.025)
-    cube("Lapel_L", (-0.24, -0.445, 1.12), (0.17, 0.025, 0.53), colors["lapel"], root, rotation=(0, -0.08, -0.34), bevel=0.025)
-    cube("Lapel_R", (0.24, -0.445, 1.12), (0.17, 0.025, 0.53), colors["lapel"], root, rotation=(0, 0.08, 0.34), bevel=0.025)
-    cube("Tie", (0, -0.485, 0.91), (0.075, 0.025, 0.36), colors["tie"], root, bevel=0.018)
-    uv_sphere("TieKnot", (0, -0.51, 1.34), (0.12, 0.055, 0.11), colors["tie"], root, segments=32, rings=20)
-    cylinder("Neck", (0, 0.0, 1.46), 0.29, 0.47, colors["fur"], root)
+    # A tapered human-like bust keeps the silhouette elegant instead of toy-like.
+    polygon_prism(
+        "Jacket",
+        [(-0.58, 0.02), (-0.72, 0.56), (-0.68, 1.10), (-0.48, 1.48),
+         (-0.29, 1.60), (0.29, 1.60), (0.48, 1.48), (0.68, 1.10),
+         (0.72, 0.56), (0.58, 0.02)],
+        -0.16,
+        0.54,
+        colors["suit"],
+        root,
+        bevel=0.055,
+    )
+    uv_sphere("Shoulder_L", (-0.59, 0.04, 1.08), (0.30, 0.34, 0.33), colors["suit"], root)
+    uv_sphere("Shoulder_R", (0.59, 0.04, 1.08), (0.30, 0.34, 0.33), colors["suit"], root)
+    uv_sphere("UpperArm_L", (-0.65, 0.08, 0.61), (0.23, 0.28, 0.52), colors["suit"], root)
+    uv_sphere("UpperArm_R", (0.65, 0.08, 0.61), (0.23, 0.28, 0.52), colors["suit"], root)
+    polygon_prism("Shirt", [(-0.23, 0.50), (-0.25, 1.48), (0.25, 1.48), (0.23, 0.50)], -0.455, 0.035, colors["shirt"], root)
+    polygon_prism("Lapel_L", [(-0.46, 1.48), (-0.18, 1.40), (-0.04, 0.88), (-0.29, 1.02)], -0.495, 0.045, colors["lapel"], root, bevel=0.018)
+    polygon_prism("Lapel_R", [(0.46, 1.48), (0.18, 1.40), (0.04, 0.88), (0.29, 1.02)], -0.495, 0.045, colors["lapel"], root, bevel=0.018)
+    polygon_prism("Tie", [(-0.065, 1.29), (-0.048, 0.62), (0.0, 0.48), (0.048, 0.62), (0.065, 1.29)], -0.535, 0.026, colors["tie"], root, bevel=0.012)
+    polygon_prism("TieKnot", [(-0.09, 1.40), (-0.055, 1.28), (0.055, 1.28), (0.09, 1.40)], -0.55, 0.032, colors["tie"], root, bevel=0.014)
+    cylinder("Neck", (0, 0.0, 1.48), 0.22, 0.40, colors["fur"], root)
 
-    # Hood behind the head plus side folds and brow arch.
-    uv_sphere("Hood_Back", (0, 0.11, 2.08), (0.72, 0.40, 0.86), colors["hood"], head_control)
-    cube("HoodFold_L", (-0.54, -0.23, 1.92), (0.17, 0.13, 0.68), colors["hood"], head_control, rotation=(-0.07, -0.07, -0.20), bevel=0.12)
-    cube("HoodFold_R", (0.54, -0.23, 1.92), (0.17, 0.13, 0.68), colors["hood"], head_control, rotation=(-0.07, 0.07, 0.20), bevel=0.12)
-    cube("Hood_Brow", (0, -0.36, 2.50), (0.53, 0.12, 0.12), colors["hood"], head_control, bevel=0.11)
+    # The hood is an organic shell and a soft opening seam, not a hard helmet.
+    uv_sphere("Hood_Back", (0, 0.10, 2.10), (0.56, 0.35, 0.72), colors["hood"], head_control)
+    curve_line(
+        "HoodOpening",
+        [(-0.39, -0.29, 1.72), (-0.49, -0.30, 1.98), (-0.46, -0.28, 2.28),
+         (-0.31, -0.25, 2.52), (0.0, -0.24, 2.61), (0.31, -0.25, 2.52),
+         (0.46, -0.28, 2.28), (0.49, -0.30, 1.98), (0.39, -0.29, 1.72)],
+        0.072,
+        colors["hood"],
+        head_control,
+    )
+    curve_line("HoodFold_L", [(-0.43, -0.20, 1.77), (-0.49, -0.14, 1.50), (-0.40, -0.05, 1.32)], 0.085, colors["hood"], head_control)
+    curve_line("HoodFold_R", [(0.43, -0.20, 1.77), (0.49, -0.14, 1.50), (0.40, -0.05, 1.32)], 0.085, colors["hood"], head_control)
 
-    # Adult lagomorph head: narrow skull, angular brows and projected muzzle.
-    uv_sphere("Skull", (0, -0.08, 2.06), (0.54, 0.48, 0.68), colors["fur"], head_control)
-    uv_sphere("Temple_L", (-0.31, -0.24, 2.13), (0.29, 0.32, 0.38), colors["fur"], head_control)
-    uv_sphere("Temple_R", (0.31, -0.24, 2.13), (0.29, 0.32, 0.38), colors["fur"], head_control)
-    uv_sphere("Muzzle_L", (-0.17, -0.54, 1.82), (0.28, 0.23, 0.25), colors["muzzle"], jaw)
-    uv_sphere("Muzzle_R", (0.17, -0.54, 1.82), (0.28, 0.23, 0.25), colors["muzzle"], jaw)
-    uv_sphere("Chin", (0, -0.43, 1.62), (0.27, 0.20, 0.16), colors["fur"], jaw)
-    uv_sphere("Nose", (0, -0.735, 1.91), (0.105, 0.065, 0.075), colors["nose"], jaw, segments=32, rings=20)
+    # Adult lagomorph head: narrow skull, long bridge and restrained muzzle.
+    uv_sphere("Skull", (0, -0.10, 2.09), (0.41, 0.35, 0.55), colors["fur"], head_control)
+    uv_sphere("FaceBridge", (0, -0.36, 2.02), (0.22, 0.17, 0.35), colors["muzzle"], head_control)
+    uv_sphere("Temple_L", (-0.25, -0.26, 2.08), (0.20, 0.20, 0.31), colors["fur"], head_control)
+    uv_sphere("Temple_R", (0.25, -0.26, 2.08), (0.20, 0.20, 0.31), colors["fur"], head_control)
+    uv_sphere("Muzzle_L", (-0.13, -0.515, 1.84), (0.21, 0.17, 0.19), colors["muzzle"], jaw)
+    uv_sphere("Muzzle_R", (0.13, -0.515, 1.84), (0.21, 0.17, 0.19), colors["muzzle"], jaw)
+    uv_sphere("Chin", (0, -0.39, 1.67), (0.20, 0.16, 0.13), colors["fur"], jaw)
+    uv_sphere("Nose", (0, -0.694, 1.91), (0.078, 0.050, 0.060), colors["nose"], jaw, segments=32, rings=20)
     create_mouth_with_visemes(jaw, contract, colors["mouth"])
-    cube("Incisor_L", (-0.045, -0.668, 1.705), (0.035, 0.018, 0.07), colors["teeth"], jaw, bevel=0.012)
-    cube("Incisor_R", (0.045, -0.668, 1.705), (0.035, 0.018, 0.07), colors["teeth"], jaw, bevel=0.012)
+    cube("Incisor_L", (-0.032, -0.665, 1.718), (0.025, 0.014, 0.052), colors["teeth"], jaw, bevel=0.009)
+    cube("Incisor_R", (0.032, -0.665, 1.718), (0.025, 0.014, 0.052), colors["teeth"], jaw, bevel=0.009)
 
     def build_eye(control, x, iris_material, suffix):
-        uv_sphere(f"EyeGlobe_{suffix}", (x, -0.545, 2.055), (0.145, 0.075, 0.115), colors["sclera"], control, segments=40, rings=24)
-        uv_sphere(f"Iris_{suffix}", (x, -0.622, 2.055), (0.065, 0.018, 0.070), iris_material, control, segments=32, rings=20)
-        uv_sphere(f"Pupil_{suffix}", (x, -0.642, 2.055), (0.021, 0.012, 0.043), colors["pupil"], control, segments=24, rings=16)
+        uv_sphere(f"EyeSocket_{suffix}", (x, -0.420, 2.075), (0.147, 0.070, 0.112), colors["fur_shadow"], control, segments=40, rings=24)
+        uv_sphere(f"EyeGlobe_{suffix}", (x, -0.458, 2.075), (0.119, 0.050, 0.083), colors["sclera"], control, segments=40, rings=24)
+        uv_sphere(f"Iris_{suffix}", (x, -0.507, 2.075), (0.052, 0.014, 0.055), iris_material, control, segments=32, rings=20)
+        uv_sphere(f"Pupil_{suffix}", (x, -0.521, 2.075), (0.014, 0.009, 0.036), colors["pupil"], control, segments=24, rings=16)
 
     # Viewer-left eye is the character's right: orange-red. Viewer-right is amber.
-    build_eye(eye_l, -0.235, colors["iris_red"], "L")
-    build_eye(eye_r, 0.235, colors["iris_amber"], "R")
-    uv_sphere("Brow_L", (-0.245, -0.575, 2.205), (0.24, 0.045, 0.075), colors["fur"], head_control, segments=32, rings=16)
-    uv_sphere("Brow_R", (0.245, -0.575, 2.205), (0.24, 0.045, 0.075), colors["fur"], head_control, segments=32, rings=16)
+    build_eye(eye_l, -0.18, colors["iris_red"], "L")
+    build_eye(eye_r, 0.18, colors["iris_amber"], "R")
+    curve_line("Brow_L", [(-0.33, -0.485, 2.24), (-0.20, -0.515, 2.24), (-0.07, -0.505, 2.17)], 0.034, colors["fur_shadow"], head_control)
+    curve_line("Brow_R", [(0.33, -0.485, 2.24), (0.20, -0.515, 2.24), (0.07, -0.505, 2.17)], 0.034, colors["fur_shadow"], head_control)
 
     def build_ear(control, x, sign, suffix):
-        outer = uv_sphere(f"EarOuter_{suffix}", (x + sign * 0.035, 0.0, 2.91), (0.22, 0.16, 0.72), colors["fur"], control, segments=40, rings=28)
-        outer.rotation_euler.y = sign * math.radians(-4.0)
-        inner = uv_sphere(f"EarInner_{suffix}", (x + sign * 0.03, -0.135, 2.92), (0.115, 0.035, 0.52), colors["inner"], control, segments=36, rings=24)
-        inner.rotation_euler.y = sign * math.radians(-4.0)
+        outer = tapered_ear(f"EarOuter_{suffix}", (x + sign * 0.025, 0.0, 3.00), (0.19, 0.13, 0.68), colors["fur"], control, lean=sign * 0.09, segments=40, rings=28)
+        outer.rotation_euler.y = sign * math.radians(-3.0)
+        inner = tapered_ear(f"EarInner_{suffix}", (x + sign * 0.024, -0.122, 3.00), (0.094, 0.026, 0.50), colors["inner"], control, lean=sign * 0.045, segments=36, rings=24)
+        inner.rotation_euler.y = sign * math.radians(-3.0)
 
     build_ear(ear_l, -0.31, -1, "L")
     build_ear(ear_r, 0.31, 1, "R")
@@ -395,10 +477,10 @@ def build_avatar(contract: dict) -> dict[str, bpy.types.Object]:
     for side in (-1, 1):
         suffix = "L" if side < 0 else "R"
         for index, z_offset in enumerate((-0.08, 0.0, 0.08), start=1):
-            start = (side * 0.19, -0.735, 1.84 + z_offset)
-            middle = (side * 0.48, -0.78, 1.85 + z_offset * 1.2)
-            end = (side * 0.82, -0.70, 1.88 + z_offset * 1.6)
-            curve_line(f"Whisker_{suffix}_{index}", [start, middle, end], 0.0042, colors["whisker"], head_control)
+            start = (side * 0.15, -0.670, 1.84 + z_offset)
+            middle = (side * 0.42, -0.735, 1.85 + z_offset * 1.2)
+            end = (side * 0.70, -0.665, 1.88 + z_offset * 1.7)
+            curve_line(f"Whisker_{suffix}_{index}", [start, middle, end], 0.0032, colors["whisker"], head_control)
 
     return {
         "root": root,
