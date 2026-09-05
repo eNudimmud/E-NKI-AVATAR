@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 
 
 router = APIRouter()
-_ASSET_ROOT = Path(__file__).resolve().parent / "public" / "avatar2d"
+_ASSET_ROOT = Path(__file__).resolve().parent.parent / "public" / "avatar2d"
 _ASSETS = {
     "enki-base.webp",
     "enki-blink.webp",

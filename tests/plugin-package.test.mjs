@@ -14,12 +14,13 @@ test("ships an installable Hermes dashboard plugin", async () => {
   const manifest = JSON.parse(await readFile(path.join(root, "dashboard/manifest.json"), "utf8"));
   const pluginYaml = await readFile(path.join(root, "plugin.yaml"), "utf8");
   const pluginModule = await readFile(path.join(root, "__init__.py"), "utf8");
-  const pluginApi = await readFile(path.join(root, "plugin_api.py"), "utf8");
+  const pluginApi = await readFile(path.join(root, "dashboard/plugin_api.py"), "utf8");
 
   assert.equal(manifest.name, "enki-avatar");
   assert.equal(manifest.tab.path, "/enki-avatar");
   assert.equal(manifest.entry, "dist/index.js");
   assert.equal(manifest.css, "dist/style.css");
+  assert.equal(manifest.api, "plugin_api.py");
   assert.match(pluginYaml, /^name: enki-avatar$/m);
   assert.match(pluginYaml, /^version: 0\.3\.0$/m);
   assert.match(pluginModule, /^def register\(ctx\):$/m);
@@ -81,7 +82,7 @@ test("registers and renders the E*NKI dashboard surface", async () => {
 });
 
 test("serves the canonical portrait set without duplicating it", async () => {
-  const pluginApi = await readFile(path.join(root, "plugin_api.py"), "utf8");
+  const pluginApi = await readFile(path.join(root, "dashboard/plugin_api.py"), "utf8");
   for (const name of [
     "enki-base.webp",
     "enki-blink.webp",
