@@ -6,7 +6,10 @@ on:
     paths:
       - "avatar/**"
       - "public/avatar2d/**"
+      - "dashboard/**"
+      - "plugin.yaml"
       - "scripts/validate-avatar2d.mjs"
+      - "tests/plugin-package.test.mjs"
       - ".github/workflows/build-avatar.yml"
 
 permissions:
@@ -29,3 +32,6 @@ jobs:
 
       - name: Validate aligned portrait set
         run: node scripts/validate-avatar2d.mjs
+
+      - name: Validate Hermes plugin bundle
+        run: node --check dashboard/dist/index.js

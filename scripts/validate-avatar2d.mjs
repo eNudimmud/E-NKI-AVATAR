@@ -4,12 +4,12 @@ import path from "node:path";
 const expectedWidth = 1024;
 const expectedHeight = 1536;
 const root = process.cwd();
-const assets = [
-  "public/avatar2d/enki-base.webp",
-  "public/avatar2d/enki-blink.webp",
-  "public/avatar2d/enki-mouth-aa.webp",
-  "public/avatar2d/enki-mouth-e.webp",
-  "public/avatar2d/enki-mouth-o.webp",
+const assetNames = [
+  "enki-base.webp",
+  "enki-blink.webp",
+  "enki-mouth-aa.webp",
+  "enki-mouth-e.webp",
+  "enki-mouth-o.webp",
 ];
 
 function webpDimensions(buffer) {
@@ -34,7 +34,8 @@ function webpDimensions(buffer) {
 }
 
 let totalBytes = 0;
-for (const asset of assets) {
+for (const assetName of assetNames) {
+  const asset = path.join("public/avatar2d", assetName);
   const absolutePath = path.join(root, asset);
   const [buffer, metadata] = await Promise.all([readFile(absolutePath), stat(absolutePath)]);
   const dimensions = webpDimensions(buffer);
@@ -42,8 +43,8 @@ for (const asset of assets) {
     throw new Error(`${asset}: expected ${expectedWidth}x${expectedHeight}, received ${dimensions.width}x${dimensions.height}`);
   }
   if (metadata.size < 20_000) throw new Error(`${asset}: unexpectedly small asset`);
-  totalBytes += metadata.size;
   console.log(`✓ ${asset} ${dimensions.width}x${dimensions.height} ${metadata.size} bytes`);
+  totalBytes += buffer.byteLength;
 }
 if (totalBytes > 1_500_000) throw new Error(`avatar payload too large: ${totalBytes} bytes`);
 console.log(`✓ portrait payload ${totalBytes} bytes`);
