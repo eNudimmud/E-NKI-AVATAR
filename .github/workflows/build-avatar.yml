@@ -1,0 +1,51 @@
+name: Build E*NKI avatar
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "avatar/**"
+      - "scripts/blender/**"
+      - ".github/workflows/build-avatar.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  blender:
+    name: Blender headless build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Blender
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes blender
+          blender --version
+
+      - name: Generate editable source, GLB and renders
+        run: |
+          blender --background --factory-startup \
+            --python scripts/blender/build_enki_avatar.py -- \
+            --output-root artifacts
+
+      - name: Validate runtime contract
+        run: |
+          python3 scripts/blender/validate_glb.py \
+            artifacts/enki-organic-v1.glb \
+            --profile production
+
+      - name: Publish build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: enki-organic-v1
+          path: |
+            artifacts/enki-organic-v1.blend
+            artifacts/enki-organic-v1.glb
+            artifacts/renders/*.png
+          if-no-files-found: error
+          retention-days: 30

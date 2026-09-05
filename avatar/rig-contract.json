@@ -1,0 +1,66 @@
+{
+  "name": "E*NKI Organic Agent Avatar",
+  "version": "1.0.0",
+  "coordinateSystem": {
+    "authoring": "Blender Z-up, -Y forward",
+    "runtime": "glTF/Three.js Y-up, +Z toward camera"
+  },
+  "files": {
+    "blend": "artifacts/enki-organic-v1.blend",
+    "glb": "artifacts/enki-organic-v1.glb",
+    "web": "public/models/enki-organic-v1.glb"
+  },
+  "requiredNodes": [
+    "EnkiRoot",
+    "HeadRig",
+    "Jaw",
+    "Mouth",
+    "Eye_L",
+    "Eye_R",
+    "Ear_L",
+    "Ear_R"
+  ],
+  "rigBones": [
+    "root",
+    "spine",
+    "neck",
+    "head",
+    "jaw",
+    "eye.L",
+    "eye.R",
+    "ear.L.01",
+    "ear.L.02",
+    "ear.R.01",
+    "ear.R.02"
+  ],
+  "visemes": [
+    { "name": "SIL", "open": 0.00, "wide": 0.00, "round": 0.00, "jaw": 0.00 },
+    { "name": "PP",  "open": 0.03, "wide": 0.08, "round": 0.00, "jaw": 0.01 },
+    { "name": "FF",  "open": 0.14, "wide": 0.28, "round": 0.00, "jaw": 0.08 },
+    { "name": "TH",  "open": 0.25, "wide": 0.16, "round": 0.00, "jaw": 0.14 },
+    { "name": "DD",  "open": 0.31, "wide": 0.19, "round": 0.00, "jaw": 0.18 },
+    { "name": "KK",  "open": 0.46, "wide": 0.08, "round": 0.00, "jaw": 0.28 },
+    { "name": "CH",  "open": 0.37, "wide": 0.00, "round": 0.24, "jaw": 0.23 },
+    { "name": "SS",  "open": 0.18, "wide": 0.34, "round": 0.00, "jaw": 0.09 },
+    { "name": "NN",  "open": 0.28, "wide": 0.17, "round": 0.00, "jaw": 0.16 },
+    { "name": "RR",  "open": 0.34, "wide": 0.00, "round": 0.18, "jaw": 0.21 },
+    { "name": "AA",  "open": 1.00, "wide": 0.16, "round": 0.00, "jaw": 0.72 },
+    { "name": "E",   "open": 0.48, "wide": 0.52, "round": 0.00, "jaw": 0.30 },
+    { "name": "I",   "open": 0.29, "wide": 0.72, "round": 0.00, "jaw": 0.16 },
+    { "name": "O",   "open": 0.66, "wide": 0.00, "round": 0.84, "jaw": 0.46 },
+    { "name": "U",   "open": 0.49, "wide": 0.00, "round": 1.00, "jaw": 0.32 }
+  ],
+  "animations": [
+    "ENKI_Idle",
+    "ENKI_Listening",
+    "ENKI_Thinking",
+    "ENKI_Speaking"
+  ],
+  "identity": {
+    "species": "adult anthropomorphic white lagomorph",
+    "face": "angular adult face, restrained expression, narrow muzzle",
+    "eyes": "character right orange-red, character left amber-yellow",
+    "wardrobe": "charcoal tailored suit, black shirt and tie, dark hood",
+    "runtimePriority": "silhouette and facial read before strand-level fur"
+  }
+}

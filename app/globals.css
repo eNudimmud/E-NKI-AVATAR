@@ -1,0 +1,171 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../vendor/shadcn-tailwind-4.13.0.css";
+
+:root {
+  color-scheme: dark;
+  --ink: #080807;
+  --panel: rgba(17, 16, 14, 0.92);
+  --line: rgba(225, 199, 139, 0.16);
+  --line-bright: rgba(225, 199, 139, 0.34);
+  --mustard: #be8429;
+  --red: #8d2630;
+  --paper: #e8e0d0;
+  --muted: #8b867c;
+  --olive: #646346;
+  --radius: 0.375rem;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--ink); }
+body {
+  color: var(--paper);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+button, input { font: inherit; }
+button { color: inherit; }
+
+.runtime-shell {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22.5rem;
+  grid-template-rows: 4.5rem minmax(0, 1fr);
+  background: radial-gradient(circle at 64% 24%, rgba(133, 39, 48, 0.12), transparent 31%), #080807;
+}
+.runtime-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.35rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 8, 7, 0.9);
+  backdrop-filter: blur(16px);
+  z-index: 4;
+}
+.brand-lockup { display: flex; align-items: center; gap: 0.9rem; }
+.brand-lockup > div { display: flex; flex-direction: column; gap: 0.1rem; }
+.brand-lockup strong { font-size: 1rem; letter-spacing: 0.24em; }
+.brand-lockup span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.brand-mark {
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.14rem;
+  border: 1px solid var(--line-bright);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px rgba(190, 132, 41, 0.05);
+}
+.brand-mark i { display: block; width: 0.18rem; height: 0.7rem; background: var(--mustard); transform: rotate(-8deg); }
+.brand-mark i:nth-child(2) { height: 0.98rem; background: var(--red); transform: none; }
+.brand-mark i:nth-child(3) { background: var(--olive); transform: rotate(8deg); }
+.live-state { display: flex; align-items: center; gap: 0.62rem; padding: 0.55rem 0.78rem; border: 1px solid var(--line); border-radius: 999px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.live-state-dot { width: 0.48rem; height: 0.48rem; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 4px rgba(139, 134, 124, 0.08); }
+.state-listening .live-state-dot { background: #d19a3f; box-shadow: 0 0 14px #d19a3f; }
+.state-thinking .live-state-dot { background: #858652; box-shadow: 0 0 14px #858652; }
+.state-speaking .live-state-dot { background: #c24550; box-shadow: 0 0 14px #c24550; animation: state-pulse 0.8s ease-in-out infinite alternate; }
+
+.stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; border-right: 1px solid var(--line); }
+.avatar-canvas { position: absolute; inset: 0; }
+.avatar-canvas canvas { width: 100%; height: 100%; display: block; }
+.stage-grid {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image: linear-gradient(rgba(219, 184, 116, 0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(219, 184, 116, 0.09) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  mask-image: linear-gradient(to bottom, transparent, black 45%, black);
+}
+.stage-caption { position: absolute; left: 1.5rem; bottom: 1.4rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.stage-caption span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.7rem; letter-spacing: 0.13em; color: var(--mustard); }
+.stage-caption strong { font-size: 1rem; font-weight: 520; }
+.signal { position: absolute; right: 1.45rem; bottom: 1.5rem; height: 2rem; display: flex; align-items: center; gap: 0.18rem; }
+.signal i { width: 2px; height: 18%; background: rgba(232, 224, 208, 0.24); transition: height 200ms ease, background 200ms ease; }
+.signal-listening i { background: rgba(190, 132, 41, 0.55); }
+.signal-speaking i { background: rgba(194, 69, 80, 0.8); animation: meter 0.7s ease-in-out infinite alternate; }
+.signal-speaking i:nth-child(3n) { animation-delay: -0.31s; }
+.signal-speaking i:nth-child(4n) { animation-delay: -0.47s; }
+.signal-thinking i:nth-child(odd) { background: rgba(133, 134, 82, 0.72); animation: meter 1.3s ease-in-out infinite alternate; }
+
+.control-deck { min-height: 0; overflow-y: auto; padding: 1.25rem; background: var(--panel); backdrop-filter: blur(18px); }
+.control-section { padding: 1.15rem 0; border-bottom: 1px solid var(--line); }
+.control-section:first-child { padding-top: 0.25rem; }
+.control-section:last-child { border-bottom: 0; }
+.section-heading { margin-bottom: 0.75rem; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.section-heading span { font-size: 0.84rem; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; }
+.section-heading small { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); font-size: 0.68rem; text-transform: uppercase; }
+.state-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.48rem; }
+.state-buttons button, .mic-button {
+  min-height: 2.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.62rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+  font-size: 0.84rem;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+.state-buttons button:hover, .mic-button:hover { border-color: var(--line-bright); background: rgba(190, 132, 41, 0.06); }
+.state-buttons button:active, .mic-button:active { transform: translateY(1px); }
+.state-buttons button.selected { border-color: rgba(190, 132, 41, 0.66); background: rgba(190, 132, 41, 0.1); }
+.state-buttons button svg { color: var(--muted); }
+.state-buttons button.selected svg { color: var(--mustard); }
+.mic-button { width: 100%; justify-content: center; background: rgba(141, 38, 48, 0.08); }
+.mic-button.active { border-color: rgba(194, 69, 80, 0.7); background: rgba(141, 38, 48, 0.18); }
+
+.test-form, .socket-row { display: grid; grid-template-columns: minmax(0, 1fr) 2.9rem; }
+.test-form input, .socket-row input {
+  min-width: 0;
+  height: 2.9rem;
+  padding: 0 0.82rem;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+  outline: none;
+  color: var(--paper);
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 0.82rem;
+}
+.test-form input:focus, .socket-row input:focus { border-color: rgba(190, 132, 41, 0.66); }
+.test-form button, .socket-row button {
+  border: 1px solid rgba(190, 132, 41, 0.56);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(190, 132, 41, 0.12);
+  color: var(--mustard);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.socket-row input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.74rem; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--mustard); outline-offset: 2px; }
+
+@keyframes state-pulse { to { transform: scale(1.3); opacity: 0.72; } }
+@keyframes meter { from { height: 14%; } to { height: 92%; } }
+
+@media (max-width: 850px) {
+  body { overflow: auto; }
+  .runtime-shell { min-height: 100svh; grid-template-columns: 1fr; grid-template-rows: 4.2rem 62svh auto; }
+  .runtime-header { grid-column: 1; padding: 0 0.9rem; }
+  .brand-lockup span { display: none; }
+  .stage { border-right: 0; border-bottom: 1px solid var(--line); }
+  .control-deck { overflow: visible; padding: 1rem; }
+  .socket-section { padding-bottom: 2rem; }
+}
+@media (max-width: 440px) {
+  .runtime-shell { grid-template-rows: 4rem 58svh auto; }
+  .live-state { font-size: 0.68rem; padding: 0.5rem 0.62rem; }
+  .brand-mark { width: 2rem; height: 2rem; }
+  .stage-caption { left: 1rem; bottom: 1rem; }
+  .signal { right: 1rem; bottom: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://the-bloc.example/schemas/enki-avatar-event.json",
+  "title": "E*NKI Avatar Event",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "state": {
+      "enum": ["idle", "listening", "thinking", "speaking"]
+    },
+    "viseme": {
+      "enum": ["SIL", "PP", "FF", "TH", "DD", "KK", "CH", "SS", "NN", "RR", "AA", "E", "I", "O", "U"]
+    },
+    "intensity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "level": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "gaze": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number", "minimum": -1, "maximum": 1 },
+        "y": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    }
+  },
+  "minProperties": 1
+}
