@@ -24,7 +24,7 @@ jobs:
       - name: Install Blender
         run: |
           sudo apt-get update
-          sudo apt-get install --yes blender
+          sudo apt-get install --yes blender python3-numpy
           blender --version
 
       - name: Generate editable source, GLB and renders
@@ -32,6 +32,8 @@ jobs:
           blender --background --factory-startup \
             --python scripts/blender/build_enki_avatar.py -- \
             --output-root artifacts
+          test -s artifacts/enki-organic-v1.blend
+          test -s artifacts/enki-organic-v1.glb
 
       - name: Validate runtime contract
         run: |
