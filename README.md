@@ -12,15 +12,13 @@ Prototype de moteur d’avatar-agent en temps réel. Le rendu fonctionne localem
 - pont WebSocket acceptant les événements de l’agent ;
 - vocabulaire de quinze visèmes adapté au futur rig Blender.
 
-Le modèle `public/models/enki-organic-v0.glb` est le secours procédural généré par `npm run avatar:build`. Le modèle Blender de production est généré sans interface graphique par `npm run avatar:blender`. Il produit :
+Le modèle Blender validé est publié sous `public/models/enki-organic-v1.glb` et chargé en priorité par Three.js. Le modèle `public/models/enki-organic-v0.glb` reste le secours procédural généré par `npm run avatar:build`. La commande `npm run avatar:blender` produit :
 
 - `artifacts/enki-organic-v1.blend`, source éditable ;
 - `artifacts/enki-organic-v1.glb`, asset temps réel ;
 - trois rendus de contrôle sous `artifacts/renders/`.
 
-Le runtime essaie automatiquement `enki-organic-v1.glb`, puis revient à `enki-organic-v0.glb` si l’asset Blender n’a pas encore été intégré.
-
-Le runtime conserve un modèle procédural de secours et le remplace automatiquement par le GLB dès que l’asset est chargé.
+Le runtime conserve le modèle procédural de secours tant que le GLB de production n’est pas disponible ou ne respecte pas le contrat.
 
 ## Protocole WebSocket
 
@@ -52,7 +50,7 @@ window.enkiAvatar.setInputLevel(0.45);
 
 Le contrat du modèle se trouve dans `avatar/rig-contract.json`. Il fige les nœuds attendus par Three.js, les os du rig, les quinze visèmes et les quatre clips d’état agent. Le script `scripts/blender/build_enki_avatar.py` construit l’avatar organique en costume anthracite et capuche sombre, conformément aux références de travail, avec l’hétérochromie canonique d’E*NKI.
 
-Le workflow `.github/workflows/build-avatar.yml` installe Blender sur un runner GitHub, exécute la génération headless, valide le GLB puis fournit le `.blend`, le `.glb` et les rendus comme artifact téléchargeable. Aucune connaissance de Blender n’est nécessaire pour lancer une construction : il suffit d’exécuter le workflow **Build E*NKI avatar** depuis l’onglet Actions.
+Le workflow `.github/workflows/build-avatar.yml` installe Blender sur un runner GitHub, exécute la génération headless, valide le GLB puis fournit le `.blend`, le `.glb` et les rendus comme artifact téléchargeable. Aucune connaissance de Blender n’est nécessaire : toute modification du générateur relance la chaîne, et le workflow **Build E*NKI avatar** peut aussi être exécuté manuellement depuis l’onglet Actions.
 
 ## Validation locale
 
